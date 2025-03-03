@@ -1,63 +1,64 @@
-let joueur=0;
+let joueur = 0;
+let matrice = [
+    [0, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+];
 
-let matrice=[[0,2,3],[4,5,6],[7,8,9]];
+const cases = document.querySelectorAll(".case");
+const resetBtn = document.getElementById("reset");
 
-let wait=()=>{};
+function isWin() {
+    const lignes = [
 
-function isWin(){
-    
-    return (matrice[0][0]==matrice[0][1] && matrice[0][1]==matrice[0][2]) 
-    ||(matrice[1][0]==matrice[1][1] && matrice[1][1]==matrice[1][2])
-    ||(matrice[2][0]==matrice[2][1] && matrice[2][1]==matrice[2][2])
-    ||(matrice[0][0]==matrice[1][0] && matrice[1][0]==matrice[2][0])
-    ||(matrice[0][1]==matrice[1][1] && matrice[1][1]==matrice[2][1])
-    ||(matrice[0][2]==matrice[1][2] && matrice[1][2]==matrice[2][2])
-    ||(matrice[0][0]==matrice[1][1] && matrice[1][1]==matrice[2][2])
-    ||(matrice[0][2]==matrice[1][1] && matrice[1][1]==matrice[2][0]);
+        [[0, 0], [0, 1], [0, 2]],
+        [[1, 0], [1, 1], [1, 2]],
+        [[2, 0], [2, 1], [2, 2]],
+
+        [[0, 0], [1, 0], [2, 0]],
+        [[0, 1], [1, 1], [2, 1]],
+        [[0, 2], [1, 2], [2, 2]],
+
+        [[0, 0], [1, 1], [2, 2]],
+        [[0, 2], [1, 1], [2, 0]]
+    ];
+
+    return lignes.some(([a, b, c]) =>
+        matrice[a[0]][a[1]] === matrice[b[0]][b[1]] &&
+        matrice[b[0]][b[1]] === matrice[c[0]][c[1]]
+    );
 }
 
+function reset() {
+    let cpt = 1;
+    joueur = 0;
+    matrice = matrice.map(row => row.map(() => ++cpt));
 
-
-let reset=()=>{
-    cpt=2;
-    for(let i=0;i<3;i++){
-        for(let j=0;j<3;j++){
-            document.getElementById(`case${i+1}${j+1}`).style.backgroundImage="";
-            matrice[i][j]=++cpt;
-        }
-    }
+    cases.forEach(cell => cell.style.backgroundImage = "");
 }
 
-let clickButton=(i,j)=>{
+function clickButton(i, j, cell) {
+    if (matrice[i][j] === -1 || matrice[i][j] === 1) return; // Empêche de jouer sur une case déjà prise
+
     joueur++;
-    if(joueur%2===0){
-        document.getElementById(`case${i+1}${j+1}`).style.backgroundImage=`url("./images/circle.jpg")`;
-        matrice[i][j]=-1;
-        
-    }else{
-        
-        document.getElementById(`case${i+1}${j+1}`).style.backgroundImage=`url("./images/cross.png")`;
-        matrice[i][j]=1;
-    }
-    
-    if(isWin()){
-        setTimeout(wait, 2000);
-        if(joueur%2===0){
-            alert("Circle win");
-        }else{
-            alert("Cross win");
-        }
-        reset();
-    }
-    
-}
-    
-for(let i=0;i<3;i++){
-    for(let j=0;j<3;j++){
-    document.getElementById(`case${i+1}${j+1}`).addEventListener("click",()=>clickButton(i,j));
+    let symbole = joueur % 2 === 0 ? "circle.jpg" : "cross.png";
+    let valeur = joueur % 2 === 0 ? -1 : 1;
+
+    cell.style.backgroundImage = `url("./images/${symbole}")`;
+    matrice[i][j] = valeur;
+
+    if (isWin()) {
+        setTimeout(() => {
+            alert(joueur % 2 === 0 ? "Circle wins!" : "Cross wins!");
+            reset();
+        }, 500);
     }
 }
 
-document.getElementById("reset").addEventListener("click",reset);
+cases.forEach((cell, index) => {
+    let i = Math.floor(index / 3);
+    let j = index % 3;
+    cell.addEventListener("click", () => clickButton(i, j, cell));
+});
 
-
+resetBtn.addEventListener("click", reset);
